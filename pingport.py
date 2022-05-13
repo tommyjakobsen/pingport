@@ -3,6 +3,17 @@
 import socket
 import time
 import sys
+import datetime
+
+
+if len(sys.argv) > 2:
+    result = True
+else:
+    result = False
+
+if result == False:
+    print("Usage:  python " + __file__ + " <host> <port>")
+    exit(0)
 
 ip = sys.argv[1]
 port = sys.argv[2]
@@ -23,6 +34,7 @@ def isOpen(ip, port):
                 s.close()
 
 def checkHost(ip, port):
+
         ipup = False
         for i in range(retry):
                 if isOpen(ip, port):
@@ -32,5 +44,16 @@ def checkHost(ip, port):
                         time.sleep(delay)
         return ipup
 
+
+a = datetime.datetime.now()
 if checkHost(ip, port):
-        print (ip + " is UP")
+        b = datetime.datetime.now()
+        delta = b - a
+        ms = int(delta.total_seconds() * 1000)
+        print (str(b) +"; INFO; " + ip + ":" + port + " is up; " + str(ms) + " ms")
+else:
+        b = datetime.datetime.now()
+        delta = b - a
+        ms = int(delta.total_seconds() * 1000)
+        addr1 = socket.gethostbyname(ip)
+        print (str(b) +"; ERROR; " + ip + ":" + port + " is not up ("+ addr1 +"); " + str(ms) +" ms" )
