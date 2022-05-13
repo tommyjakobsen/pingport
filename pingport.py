@@ -1,29 +1,36 @@
-async def wait_host_port(host, port, duration=10, delay=2):
-    """Repeatedly try if a port on a host is open until duration seconds passed
-    
-    Parameters
-    ----------
-    host : str
-        host ip address or hostname
-    port : int
-        port number
-    duration : int, optional
-        Total duration in seconds to wait, by default 10
-    delay : int, optional
-        delay in seconds between each try, by default 2
-    
-    Returns
-    -------
-    awaitable bool
-    """
-    tmax = time.time() + duration
-    while time.time() < tmax:
+#!/usr/bin/python
+
+import socket
+import time
+import sys
+
+ip = sys.argv[1]
+port = sys.argv[2]
+retry = 1
+delay = 1
+timeout = 5
+
+def isOpen(ip, port):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(timeout)
         try:
-            _reader, writer = await asyncio.wait_for(asyncio.open_connection(host, port), timeout=5)
-            writer.close()
-            await writer.wait_closed()
-            return True
+                s.connect((ip, int(port)))
+                s.shutdown(socket.SHUT_RDWR)
+                return True
         except:
-            if delay:
-                await asyncio.sleep(delay)
-    return False
+                return False
+        finally:
+                s.close()
+
+def checkHost(ip, port):
+        ipup = False
+        for i in range(retry):
+                if isOpen(ip, port):
+                        ipup = True
+                        break
+                else:
+                        time.sleep(delay)
+        return ipup
+
+if checkHost(ip, port):
+        print (ip + " is UP")
